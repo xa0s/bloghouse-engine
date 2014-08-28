@@ -1,0 +1,220 @@
+#!/usr/bin/env ruby
+
+# A few helpful tips about the Rules file:
+#
+# * The string given to #compile and #route are matching patterns for
+#   identifiers--not for paths. Therefore, you can’t match on extension.
+#
+# * The order of rules is important: for each item, only the first matching
+#   rule is applied.
+#
+# * Item identifiers start and end with a slash (e.g. “/about/” for the file
+#   “content/about.html”). To select all children, grandchildren, … of an
+#   item, use the pattern “/about/*/”; “/about/*” will also select the parent,
+#   because “*” matches zero or more characters.
+
+preprocess do
+	@config[:languages].each do |lang|
+
+		Localize.to lang
+
+		articles = sorted_articles_by_lang(lang)
+		timeline = timeline_of(articles)
+
+		catalogs = timeline.keys.map do |year|
+			Nanoc::Item.construct(
+				@site, "",
+				{ :title => tr('catalog.title.all.paged', :year => year), :pager => year, :entries => timeline[year] }, # format(@config[:title_for_paged_list], year)
+				"/blog/paged-list/#{year}/#{lang}/"
+			)
+		end
+
+		catalogs << Nanoc::Item.construct(
+			@site, "",
+			{ :title => tr('catalog.title.all.latest'), :pager => tr("catalog.pager.latest"), :entries => articles.take(@config[:latest_count]) },
+			"/blog/latest-list/#{lang}/"
+		)
+
+		catalogs.each do |cat|
+			cat.catalogs = catalogs
+		end
+
+		items.concat catalogs
+
+		tags_latest = []
+
+		tags.each do |tag|
+
+			tag_articles = sorted_articles_by_lang_and_tag(lang, tag)
+			tag_timeline = timeline_of(tag_articles)
+
+			tag_catalogs = timeline.keys.map do |year|
+				Nanoc::Item.construct(
+					@site, "",
+					{ :title => tr('catalog.title.tagged.paged', :tag => tr(tag, :scope => :tag), :year => year), :pager => year, :entries => tag_timeline[year], :tag => tag },
+					"/blog/tag-paged-list/#{tag}/#{year}/#{lang}/"
+				)
+			end
+
+			tag_latest = Nanoc::Item.construct(
+				@site, "",
+				{ :title => tr('catalog.title.tagged.latest', :tag => tr(tag, :scope => :tag)), :pager => tr("catalog.pager.latest"), :entries => tag_articles.take(@config[:latest_count]), :tag => tag },
+				"/blog/tag-latest-list/#{tag}/#{lang}/"
+			)
+
+			tag_catalogs << tag_latest
+
+			tag_catalogs.each do |cat|
+				cat.catalogs = tag_catalogs
+			end	
+
+			tags_latest << tag_latest
+			items.concat tag_catalogs
+		end
+
+		items << Nanoc::Item.construct(
+			@site, "",
+			{ :title => tr('catalog.header.tags.all'), :entries => tags_latest },
+			"/blog/tags/#{lang}/"
+		)
+	end
+end
+
+#
+# per language and per tag blog indexes
+#
+
+@config[:languages].each do |lang|
+
+	route "/blog/latest-list/#{lang}/" do
+		"/#{lang}/blog/index.html"
+	end
+
+	route "/blog/paged-list/*/#{lang}/" do
+		pager = item[:pager]
+		"/#{lang}/blog/#{pager}/index.html"
+	end
+
+	route "/blog/tag-latest-list/*/#{lang}/" do
+		tag = item[:tag]
+		"/#{lang}/blog/tags/#{tag}/index.html"
+	end
+
+	route "/blog/tag-paged-list/*/*/#{lang}/" do
+		tag = item[:tag]
+		pager = item[:pager]
+		"/#{lang}/blog/tags/#{tag}/#{pager}/index.html"
+	end
+
+	route "/blog/tags/#{lang}/" do
+		"/#{lang}/blog/tags/index.html"
+	end
+
+
+	compile "/blog/latest-list/#{lang}/" do
+		filter :erb
+		layout 'catalog'
+	end
+
+	compile "/blog/paged-list/*/#{lang}/" do
+		filter :erb
+		layout 'catalog'
+	end
+
+	compile "/blog/tag-latest-list/*/#{lang}/" do
+		filter :erb
+		layout 'catalog'
+	end
+
+	compile "/blog/tag-paged-list/*/*/#{lang}/" do
+		filter :erb
+		layout 'catalog'
+	end
+
+	compile "/blog/tags/#{lang}/" do
+		filter :erb
+		layout 'taglist'
+	end
+end
+
+
+#
+# blog posts
+#
+
+compile '/posts/*' do
+	filter :kramdown
+	layout 'posting'
+end
+
+route '/posts/*/*' do
+
+	lang = item.i18n[:lang]
+	time = attribute_to_time(item[:created_at]).year
+	slug = item[:slug]
+
+	"/#{lang}/blog/#{time}/#{slug}/index.html"
+end
+
+
+# 
+# pages
+#
+
+route '/pages/*' do
+	item.identifier[6..-1] + 'index.html'
+end
+
+compile 'pages/*' do
+	if item[:extension] == '3xx'
+		filter :erb
+		layout 'redirect'
+	else
+		filter :erb
+		layout 'default'
+	end
+end
+
+
+#
+# Special cases
+#   - ignore g11n files
+#   - copy robots.txt as-is
+#
+
+ignore '/g11n/*'
+passthrough '/robots/'
+
+
+#
+# default rules
+#
+
+compile '*' do
+	if item[:extension] == 'md'
+		filter :kramdown
+		layout 'default'  
+	elsif item[:extension] == 'css'
+		# don’t filter stylesheets
+	elsif item.binary?
+		# don’t filter binary items
+	else
+		filter :erb
+		layout 'default'
+	end
+end
+
+route '*' do
+	if item[:extension] == 'css'
+		# Write item with identifier /foo/ to /foo.css
+		item.identifier.chop + '.css'
+	elsif item.binary?
+		# Write item with identifier /foo/ to /foo.ext
+		item.identifier.chop + '.' + item[:extension]
+	else
+		# Write item with identifier /foo/ to /foo/index.html
+		item.identifier + 'index.html'
+	end
+end
+
+layout '*', :erb
