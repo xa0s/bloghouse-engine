@@ -178,11 +178,13 @@ end
 
 #
 # Special cases
-#   - ignore g11n files
+#   - ignore g11n, license, readme
 #   - copy robots.txt as-is
 #
 
 ignore '/g11n/*'
+ignore '/LICENSE/'
+ignore '/README/'
 passthrough '/robots/'
 
 
