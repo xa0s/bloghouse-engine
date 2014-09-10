@@ -1,7 +1,7 @@
 require 'i18n'
 
 I18n.enforce_available_locales = true
-I18n.load_path = Dir['../g11n/*.yml', '../layouts/g11n/*.yml', '../content/g11n/*.yml']
+I18n.load_path = Dir['../g11n/locales/*.yml', '../design/g11n/*.yml', '../content/g11n/*.yml']
 
 def tr(*args)
 	I18n.translate *args
