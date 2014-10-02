@@ -63,13 +63,3 @@ data_sources:
 
     # The default encoding for all files in `content/` and `layouts/`.
     encoding: utf-8
-
-# A list of languages site supports.
-# The firts in a list is concidered default language.
-languages: [ 'en', 'uk' ]
-
-# Number of posts displayed on latest posts page.
-latest_count: 8
-
-# Date format to use throughout the site
-time_format: 

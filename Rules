@@ -14,7 +14,7 @@
 #   because “*” matches zero or more characters.
 
 preprocess do
-	@config[:languages].each do |lang|
+	$pref[:languages].each do |lang|
 
 		Localize.to lang
 
@@ -24,14 +24,14 @@ preprocess do
 		catalogs = timeline.keys.map do |year|
 			Nanoc::Item.construct(
 				@site, "",
-				{ :title => tr('catalog.title.all.paged', :year => year), :pager => year, :entries => timeline[year] }, # format(@config[:title_for_paged_list], year)
+				{ :title => tr('catalog.title.all.paged', :year => year), :pager => year, :entries => timeline[year] },
 				"/blog/paged-list/#{year}/#{lang}/"
 			)
 		end
 
 		catalogs << Nanoc::Item.construct(
 			@site, "",
-			{ :title => tr('catalog.title.all.latest'), :pager => tr("catalog.pager.latest"), :entries => articles.take(@config[:latest_count]) },
+			{ :title => tr('catalog.title.all.latest'), :pager => tr("catalog.pager.latest", :count => $pref[:latest_count]), :entries => articles.take($pref[:latest_count]) },
 			"/blog/latest-list/#{lang}/"
 		)
 
@@ -58,7 +58,7 @@ preprocess do
 
 			tag_latest = Nanoc::Item.construct(
 				@site, "",
-				{ :title => tr('catalog.title.tagged.latest', :tag => tr(tag, :scope => :tag)), :pager => tr("catalog.pager.latest"), :entries => tag_articles.take(@config[:latest_count]), :tag => tag },
+				{ :title => tr('catalog.title.tagged.latest', :tag => tr(tag, :scope => :tag)), :pager => tr("catalog.pager.latest", :count => $pref[:latest_count]), :entries => tag_articles.take($pref[:latest_count]), :tag => tag },
 				"/blog/tag-latest-list/#{tag}/#{lang}/"
 			)
 
@@ -84,7 +84,7 @@ end
 # per language and per tag blog indexes
 #
 
-@config[:languages].each do |lang|
+$pref[:languages].each do |lang|
 
 	route "/blog/latest-list/#{lang}/" do
 		"/#{lang}/blog/index.html"
@@ -178,13 +178,14 @@ end
 
 #
 # Special cases
-#   - ignore g11n, license, readme
+#   - ignore g11n, license, readme, preferences
 #   - copy robots.txt as-is
 #
 
 ignore '/g11n/*'
 ignore '/LICENSE/'
 ignore '/README/'
+ignore '/preferences/'
 passthrough '/robots/'
 
 

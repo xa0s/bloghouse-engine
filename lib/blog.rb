@@ -24,10 +24,10 @@ class Nanoc::Item
             lang = $~[2]
         end
 
-        if @site.config[:languages].include? lang
+        if $pref[:languages].include? lang
             { :id => id, :lang => lang }
         else
-            { :id => self.identifier, :lang => @site.config[:languages][0] }
+            { :id => self.identifier, :lang => $pref[:languages][0] }
         end
     end
 
