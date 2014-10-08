@@ -39,7 +39,7 @@ data_sources:
     # `filesystem_unified`.
     type: filesystem_customizable
     config:
-      source_dir: ['../content']
+      source_dir: ['../content', '../design/assets']
       layout_dir: ['../design/layouts']
 
     # The path where items should be mounted (comparable to mount points in
