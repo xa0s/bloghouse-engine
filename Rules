@@ -176,6 +176,7 @@ compile '/pages/*' do
 end
 
 compile '/css/*' do
+	filter :rainpress
 end
 
 route '/css/*' do
