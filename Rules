@@ -196,6 +196,7 @@ ignore '/README/'
 ignore '/preferences/'
 passthrough '/robots/'
 passthrough '/LICENSE/'
+passthrough '/CNAME/'
 
 #
 # default rules
