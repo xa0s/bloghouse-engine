@@ -192,11 +192,10 @@ end
 #
 
 ignore '/g11n/*'
-ignore '/LICENSE/'
 ignore '/README/'
 ignore '/preferences/'
 passthrough '/robots/'
-
+passthrough '/LICENSE/'
 
 #
 # default rules
