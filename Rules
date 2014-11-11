@@ -183,7 +183,12 @@ route '/css/*' do
 	"/assets#{item.identifier.chop}.css"
 end
 
+compile '/js/*' do
+end
 
+route '/js/*' do
+	"/assets#{item.identifier.chop}.js"
+end
 
 #
 # Special cases
