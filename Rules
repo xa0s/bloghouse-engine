@@ -78,6 +78,8 @@ preprocess do
 			"/blog/tags/#{lang}/"
 		)
 	end
+
+	@config[:base_url] = $pref[:base_url]
 end
 
 #
@@ -162,11 +164,17 @@ end
 #
 
 route '/pages/*' do
-	item.identifier[6..-1] + 'index.html'
+	if item[:extension] == 'atom'
+		item.identifier[6..-2] + '.xml'
+	else
+		item.identifier[6..-1] + 'index.html'
+	end
 end
 
 compile '/pages/*' do
-	if item[:extension] == '3xx'
+	if item[:extension] == 'atom'
+		filter :erb
+	elsif item[:extension] == '3xx'
 		filter :erb
 		layout 'redirect'
 	else
