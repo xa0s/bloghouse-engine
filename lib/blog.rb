@@ -1,6 +1,9 @@
 include Nanoc3::Helpers::Blogging
 include Nanoc3::Helpers::Tagging
 
+require "erb" 
+include ERB::Util
+
 class Nanoc::Item
 
     def self.construct(site, raw_content_or_raw_filename, attributes, identifier, params = nil)
@@ -40,6 +43,9 @@ class Nanoc::Item
        t.is_a?(Time) ? t : nil
     end
 
+    def url
+    	$pref[:base_url] + self.path
+    end
 end
 
 def articles_by_lang(lang)
