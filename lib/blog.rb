@@ -49,7 +49,7 @@ class Nanoc::Item
 end
 
 def articles_by_lang(lang)
-    blk = lambda { articles.select { |item| item.i18n[:lang] == lang } }
+    blk = lambda { articles.select { |item| item.i18n[:lang] == lang and !item[:sandbox] } }
     
     blk.call
 end
@@ -78,6 +78,10 @@ def translations
     else
         blk.call
     end
+end
+
+def versions_of(item)
+	translations[item.i18n[:id]] || {}
 end
 
 def translations_of(item)
