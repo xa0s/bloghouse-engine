@@ -145,6 +145,7 @@ end
 #
 
 compile '/posts/*' do
+	filter :erb
 	filter :kramdown
 	layout 'posting'
 end
