@@ -22,16 +22,18 @@ class Nanoc::Item
     end
 
     def parse_i18n
-        if self.identifier =~ %r{(\/.*\/)([^\/]+)\/}
-            id = $~[1]
-            lang = $~[2]
-        end
+    	langs = $pref[:languages].select do |lang|
+    		self.identifier.include? "/#{lang}/"
+    	end
 
-        if $pref[:languages].include? lang
-            { :id => id, :lang => lang }
-        else
-            { :id => self.identifier, :lang => $pref[:languages][0] }
-        end
+    	case langs.size
+    	when 0
+    		{ :id => self.identifier, :lang => $pref[:languages][0] }
+    	when 1
+    		{ :id => self.identifier =~ %r{^(/.*/)#{langs[0]}/$} ? $~[1] : self.identifier, :lang => langs[0] }
+    	else
+    		abort "Error: the language of item #{self.identifier} is ambiguous!"
+    	end
     end
 
     def i18n

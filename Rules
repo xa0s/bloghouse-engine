@@ -184,6 +184,10 @@ compile '/pages/*' do
 	end
 end
 
+#
+# assets
+#
+
 compile '/css/*' do
 	filter :rainpress
 end
