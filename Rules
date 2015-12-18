@@ -31,7 +31,7 @@ preprocess do
 
 		catalogs << Nanoc::Item.construct(
 			@site, "",
-			{ :title => tr('catalog.title.all.latest'), :pager => tr("catalog.pager.latest", :count => $pref[:latest_count]), :entries => articles.take($pref[:latest_count]) },
+			{ :title => tr('catalog.title.all.latest'), :pager => tr("catalog.pager.latest", :count => $pref[:latest_count]), :changefreq => 'weekly', :entries => articles.take($pref[:latest_count]) },
 			"/blog/latest-list/#{lang}/"
 		)
 
@@ -165,22 +165,24 @@ end
 #
 
 route '/pages/*' do
-	if item[:extension] == 'atom'
-		item.identifier[6..-2] + '.xml'
-	else
-		item.identifier[6..-1] + 'index.html'
+	case item[:extension]
+		when 'atom', 'xml'
+			item.identifier[6..-2] + '.xml'
+		else
+			item.identifier[6..-1] + 'index.html'
 	end
 end
 
 compile '/pages/*' do
-	if item[:extension] == 'atom'
-		filter :erb
-	elsif item[:extension] == '3xx'
-		filter :erb
-		layout 'redirect'
-	else
-		filter :erb
-		layout 'default'
+	case item[:extension]
+		when 'atom', 'xml'
+			filter :erb
+		when '3xx'
+			filter :erb
+			layout 'redirect'
+		else
+			filter :erb
+			layout 'default'
 	end
 end
 
