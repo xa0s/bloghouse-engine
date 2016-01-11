@@ -9,3 +9,22 @@ class NilClass
     nil
   end
 end
+
+def category_of(item)
+	if item.identifier =~ %r{^/posts/} || item.identifier =~ %r{^/blog/}
+		'blog'
+	else
+		'general'
+	end
+end
+
+def title_of(item)
+	title = item[:title]
+	category = tr(category_of(item), :scope => :category)
+
+	if title
+		"#{title} | #{category}"
+	else
+		category
+	end
+end
