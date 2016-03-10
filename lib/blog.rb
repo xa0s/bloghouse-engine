@@ -123,7 +123,7 @@ def sorted_articles_by_lang_and_tag(lang, tag)
 end
 
 def timeline_of(items)
-    timeline = OrderedHash.new{|h,k| h[k] = []}
+    timeline = Hash.new{|h,k| h[k] = []}
     
     items.reverse.each do |article|
         time = attribute_to_time(article[:created_at])
